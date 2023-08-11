@@ -2,6 +2,7 @@ import Form from "./expense-tracker/components/Form";
 import Table from "./expense-tracker/components/Table";
 import Tracker from "./expense-tracker/components/Tracker";
 import { useState } from "react";
+import "./app.css";
 
 export const categories = ["Groceries", "Utilities", "Entertainment"];
 
@@ -19,33 +20,35 @@ function App() {
     : itemList;
 
   return (
-    <div>
-      <Form
-        onUpdate={(obj) => {
-          setItemList([
-            ...itemList,
-            {
-              id: ids + 1,
-              description: obj.description,
-              amount: obj.amount,
-              category: obj.category,
-            },
-          ]);
-          setIds(ids + 1);
-        }}
-        categories={categories}
-      />
-      <Tracker
-        onSelectCategory={(category) => {
-          setSelectedCategory(category);
-        }}
-      />
-      <Table
-        itemList={visibleItems}
-        onDelete={(id) => {
-          setItemList(itemList.filter((item) => item.id !== id));
-        }}
-      />
+    <div className="container-fluid d-flex justify-content-center">
+      <div className="submit__form">
+        <Form
+          onUpdate={(obj) => {
+            setItemList([
+              ...itemList,
+              {
+                id: ids + 1,
+                description: obj.description,
+                amount: obj.amount,
+                category: obj.category,
+              },
+            ]);
+            setIds(ids + 1);
+          }}
+          categories={categories}
+        />
+        <Tracker
+          onSelectCategory={(category) => {
+            setSelectedCategory(category);
+          }}
+        />
+        <Table
+          itemList={visibleItems}
+          onDelete={(id) => {
+            setItemList(itemList.filter((item) => item.id !== id));
+          }}
+        />
+      </div>
     </div>
   );
 }
