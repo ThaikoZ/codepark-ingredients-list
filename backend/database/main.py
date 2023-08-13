@@ -1,9 +1,9 @@
-
+# FastAPI Library
 from fastapi import FastAPI, status, Depends
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 
 from typing import Annotated
-
 from sqlalchemy.orm import Session
 from enum import Enum
 
@@ -16,6 +16,7 @@ from database import SessionLocal, engine
 
 class Tags(Enum):
     users = "Users"
+    categories = "Category"
     items = "Items"
 
 
@@ -23,10 +24,19 @@ models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="App API", version="0.0.1")
 
-# Dependency
+origins = ["http://localhost:5173"]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 def get_db():
+    # Dependency
     db = SessionLocal()
     try:
         yield db
@@ -34,27 +44,26 @@ def get_db():
         db.close()
 
 
-@app.get("/items", tags=[Tags.items], summary="Get list of items")
-async def get_items(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+@app.get("/api/items", tags=[Tags.items], summary="Get list of items")
+def get_items(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     items = crud.get_items(db, skip, limit)
     return items
 
 
-@app.get("/items/{item_id}", tags=[Tags.items])
-async def get_item(item_id: int, db: Session = Depends(get_db)):
+@app.get("/api/items/{item_id}", tags=[Tags.items])
+def get_item(item_id: int, db: Session = Depends(get_db)):
     item = crud.get_item(db, item_id)
     return item
 
 
-@app.post("/items/add", tags=[Tags.items], status_code=status.HTTP_201_CREATED)
-async def add_item(item: schemas.ItemBase, db: Session = Depends(get_db)):
+@app.post("/api/items/add", tags=[Tags.items], status_code=status.HTTP_201_CREATED)
+def add_item(item: schemas.ItemBase, db: Session = Depends(get_db)):
     msg = crud.create_item(db, item)
     return msg
-# @app.get("/items")
-# async def get_items(db: Session, skip: int = 0, limit: int = 100):
-#   return db.query(models.Item).offset(skip).limit(limit).all()
 
 
-# TODO: The whole REST API to comunicate with server
-# TODO: The connection to sqlite db with items in a array
-# TODO: Try to make a login autorization and session token
+@app.delete("/api/items/delete/{item_id}", tags=[Tags.items])
+def delete_item(item_id: int, db: Session = Depends(get_db)):
+    db_item = crud.get_item(db, item_id)
+    msg = crud.delete_item(db, db_item)
+    return msg

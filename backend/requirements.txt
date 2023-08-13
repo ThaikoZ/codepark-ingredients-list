@@ -1,5 +1,7 @@
 fastapi
+fastapi-cors
 sqlalchemy
 uvicorn
 pydantic
 python-multipart
+
