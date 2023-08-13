@@ -19,6 +19,4 @@ class Item(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     description = Column(String)
     amount = Column(Integer)
-    category = Column(Integer, ForeignKey("categories.id"))
-
-    category = relationship("Category", back_populates="items")
+    category = Column(String)

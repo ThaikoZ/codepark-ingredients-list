@@ -16,11 +16,6 @@ class ItemBase(BaseModel):
     category: str
 
 
-class CategoryBase(BaseModel):
-    id: int
-    name: str
-
-
 class UserBase(BaseModel):
     """Schema of a Users table in a database.
 

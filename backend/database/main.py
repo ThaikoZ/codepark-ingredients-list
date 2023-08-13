@@ -16,7 +16,6 @@ from database import SessionLocal, engine
 
 class Tags(Enum):
     users = "Users"
-    categories = "Category"
     items = "Items"
 
 
@@ -24,7 +23,7 @@ models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="App API", version="0.0.1")
 
-origins = ["http://localhost:5173"]
+origins = ["http://localhost:5173", "http://127.0.0.1:5173"]
 
 app.add_middleware(
     CORSMiddleware,
