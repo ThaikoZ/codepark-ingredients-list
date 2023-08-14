@@ -1,8 +1,10 @@
 [build]
-  command = "cd frontend"
-  command = "npm run build"
-  command = "cd ../backend"
-  command = "pip install -r requirements.txt"
-  command = "cd database"
-  command = "uvicorn main:app --reload"
+  command = """
+    cd frontend && npm install && npm run build && cd ../backend && pip install -r requirements.txt && uvicorn main:app --host 0.0.0.0 --port $PORT
+  """
+  publish = "frontend/build"  # Adjust the path to your built frontend files
 
+[[redirects]]
+  from = "/api/*"
+  to = "http://localhost:8000/api/:splat"
+  status = 200
