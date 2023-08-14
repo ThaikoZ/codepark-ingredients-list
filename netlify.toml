@@ -1,0 +1,8 @@
+[build]
+  command = "cd frontend"
+  command = "npm run build"
+  command = "cd ../backend"
+  command = "pip install -r requirements.txt"
+  command = "cd database"
+  command = "uvicorn main:app --reload"
+
