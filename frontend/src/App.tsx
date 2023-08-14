@@ -2,65 +2,70 @@ import Form from "./expense-tracker/components/Form";
 import Table from "./expense-tracker/components/Table";
 import Tracker from "./expense-tracker/components/Tracker";
 import { useState, useEffect } from "react";
-import axios from "axios";
+import ItemsService, { Item } from "./services/items-service";
 import "./app.css";
 
 export const categories = ["Groceries", "Utilities", "Entertainment"];
-
-interface Item {
-  id: number
-  description: string
-  amount: number
-  category: string
-}
 
 function App() {
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [itemList, setItemList] = useState<Item[]>([]);
   const [lastId, setLastId] = useState<number>(0);
+  const [isLoading, setLoading] = useState<boolean>(false);
 
   useEffect(() => {
     fetchItems();
-  }, [])
+  }, []);
 
   const visibleItems = selectedCategory
     ? itemList.filter((item) => item.category === selectedCategory)
     : itemList;
 
   const fetchItems = () => {
-    axios
-      .get("http://127.0.0.1:8000/api/items")
+    setLoading(true);
+    const { request, cancel } = ItemsService.getAllItems();
+    request
       .then((response) => {
-        setItemList(response.data); 
+        setItemList(response.data);
         setLastId(response.data[response.data.length - 1].id);
       })
-      .catch((err) => { 
-        console.log(err)
+      .catch((err) => {
+        console.log(err);
       })
-  }
+      .finally(() => {
+        setLoading(false);
+      });
+
+    return () => cancel();
+  };
+
   const addItem = (item: Item) => {
-    axios
-      .post("http://127.0.0.1:8000/api/items/add", item)
-      .then(fetchItems)
-      .catch((err) => console.log(err))
-  }
+    setItemList([item, ...itemList]);
+
+    const { request, cancel } = ItemsService.addItem(item);
+    request.catch((err) => console.log(err));
+    return () => cancel();
+  };
   const deleteItem = (item_id: number) => {
-    axios
-      .delete(`http://127.0.0.1:8000/api/items/delete/${item_id}`)
-      .then(fetchItems)
-      .catch((err) => console.log(err))
-  }
+    setItemList(itemList.filter((item) => item.id !== item_id));
+
+    const { request, cancel } = ItemsService.deleteItem(item_id);
+    request.catch((err) => console.log(err));
+    return () => cancel();
+  };
 
   return (
     <div className="container-fluid d-flex justify-content-center">
       <div className="submit__form">
         <Form
-          onUpdate={(obj) => addItem({
-            id: lastId + 1,
-            description: obj.description,
-            amount: obj.amount,
-            category: obj.category,
-          })}
+          onUpdate={(obj) =>
+            addItem({
+              id: lastId + 1,
+              description: obj.description,
+              amount: obj.amount,
+              category: obj.category,
+            })
+          }
           categories={categories}
         />
         <Tracker
@@ -68,10 +73,15 @@ function App() {
             setSelectedCategory(category);
           }}
         />
+        {isLoading && (
+          <div className="d-flex justify-content-center mt-5">
+            <div className="spinner-border "></div>
+          </div>
+        )}
         <Table
           itemList={visibleItems}
           onDelete={(id) => {
-            console.log(id)
+            console.log(id);
             deleteItem(id);
           }}
         />
