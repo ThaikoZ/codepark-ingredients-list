@@ -4,14 +4,14 @@
 - Connect frontend with backend using generic service and hook.
 - Display interface of ingredients
 
+TODO:
+
 **FRONTEND**
 
-# TODO: Make a login and register page.
+- Route: /auth contain a outlet page. Make a redirect
 
 **BACKEND**:
 
-# TODO: Add a table with categories
-
-# TODO: Make a backend autorization and session token.
-
-# TODO: The whole documentation to whole backend
+- Add a table with categories
+- Make a backend autorization and session token.
+- The whole documentation to whole backend

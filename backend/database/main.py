@@ -1,27 +1,30 @@
 # FastAPI Library
-from fastapi import FastAPI, status, Depends
+from fastapi import FastAPI, status, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 
-from typing import Annotated
 from sqlalchemy.orm import Session
 from enum import Enum
+from typing import Annotated
 
 # Local import
 import schemas
 import models
 import crud
 from database import SessionLocal, engine
+import auth
+from auth import get_current_user
 
 
 class Tags(Enum):
     users = "Users"
     items = "Items"
+    auth = "Auth"
 
 
 models.Base.metadata.create_all(bind=engine)
 
-app = FastAPI(title="App API", version="0.0.1")
+app = FastAPI(title="App API", version="0.1.0")
+app.include_router(auth.router)
 
 origins = ["http://localhost:5173", "http://127.0.0.1:5173"]
 
@@ -35,12 +38,14 @@ app.add_middleware(
 
 
 def get_db():
-    # Dependency
     db = SessionLocal()
     try:
         yield db
     finally:
         db.close()
+
+
+user_dependency = Annotated[dict, Depends(get_current_user)]
 
 
 @app.get("/api/items", tags=[Tags.items], summary="Get list of items")
@@ -66,3 +71,10 @@ def delete_item(item_id: int, db: Session = Depends(get_db)):
     db_item = crud.get_item(db, item_id)
     msg = crud.delete_item(db, db_item)
     return msg
+
+
+@app.get('/auth/me', status_code=status.HTTP_200_OK, tags=[Tags.auth])
+async def user(user: user_dependency, db: Session = Depends(get_db)):
+    if user is None:
+        raise HTTPException(status_code=401, detail='Authentication Failed')
+    return {'user': user}

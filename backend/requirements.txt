@@ -4,4 +4,6 @@ sqlalchemy
 uvicorn
 pydantic
 python-multipart
-
+python-jose[cryptography]
+passlib[bcrypt]
+python-decouple
