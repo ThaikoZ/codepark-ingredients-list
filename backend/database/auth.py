@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 from typing import Annotated
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Form
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from starlette import status
@@ -10,9 +10,10 @@ from passlib.context import CryptContext
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import JWTError, jwt
 from decouple import config
+from fastapi.middleware.cors import CORSMiddleware
 
 router = APIRouter(
-    prefix='/auth',
+    prefix='/api/auth',
     tags=['Auth']
 )
 
@@ -56,6 +57,13 @@ async def create_user(create_user_request: CreateUserRequest, db: db_dependency)
         disabled=False
     )
 
+    # Check if the account with a given email already exist
+    user = db.query(Users).filter(Users.email == new_user.email).first()
+
+    if user:
+        raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE,
+                            detail="Account with this email already exists")
+
     db.add(new_user)
     db.commit()
 
@@ -63,9 +71,11 @@ async def create_user(create_user_request: CreateUserRequest, db: db_dependency)
 @router.post("/token", response_model=Token)
 async def login_for_access_token(form_data: Annotated[OAuth2PasswordRequestForm, Depends()], db: db_dependency):
     user = authenticate_user(form_data.username, form_data.password, db)
+
     if not user:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="Could not validate user")
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="There is no user with given email and password")
+
     token = create_access_token(
         user.full_name, user.email, user.id, timedelta(minutes=EXPIRES_TIME))
 

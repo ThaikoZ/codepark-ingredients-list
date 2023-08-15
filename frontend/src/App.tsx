@@ -3,6 +3,7 @@ import Table from "./expense-tracker/components/Table";
 import Tracker from "./expense-tracker/components/Tracker";
 import { useState, useEffect } from "react";
 import ItemsService, { Item } from "./services/items-service";
+import UsersService from "./services/users-service";
 import "./app.css";
 
 export const categories = ["Groceries", "Utilities", "Entertainment"];
@@ -14,6 +15,9 @@ function App() {
   const [isLoading, setLoading] = useState<boolean>(false);
 
   useEffect(() => {
+    // TODO: Session authentication
+    // token is in a local storage at key 'session_token'
+    // UsersService.authenticateUser();
     fetchItems();
   }, []);
 

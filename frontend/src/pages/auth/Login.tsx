@@ -1,17 +1,35 @@
-import { Link } from "react-router-dom";
-import { useForm } from "react-hook-form";
+import { Link, useNavigate } from "react-router-dom";
+import { useForm, FieldValues } from "react-hook-form";
+import { useState } from "react";
+import UserService, { LoginForm } from "../../services/users-service";
 import "../../app.css";
 
 const Login = () => {
+  const navigate = useNavigate();
   const { register, handleSubmit } = useForm();
+  const [errorMessage, setErrorMessage] = useState("");
 
+  const logIn = (dataForm: FieldValues) => {
+    const body: LoginForm = {
+      username: dataForm.email,
+      password: dataForm.password,
+    };
+
+    const { request, cancel } = UserService.loginUser(body);
+    request.then((data) => {
+      localStorage.setItem("session_token", JSON.stringify(data.data));
+      navigate("../../items");
+    });
+    request.catch((err) => setErrorMessage(err.response.data.detail));
+    return () => cancel();
+  };
   return (
     <div className="container-fluid d-flex justify-content-center">
       <div className="submit__form">
         <form
           className="mt-1 mb-5 f-grid"
           // TODO: Check the data is valid
-          onSubmit={handleSubmit((data) => console.log(data))}
+          onSubmit={handleSubmit((data) => logIn(data))}
         >
           <div className="mb-3">
             <label htmlFor="email" className="form-label">
@@ -42,6 +60,9 @@ const Login = () => {
             Create account
           </Link>
         </form>
+        {errorMessage && (
+          <p className="form-text text-danger mb-0">{errorMessage + "."}</p>
+        )}
       </div>
     </div>
   );

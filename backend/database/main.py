@@ -26,7 +26,10 @@ models.Base.metadata.create_all(bind=engine)
 app = FastAPI(title="App API", version="0.1.0")
 app.include_router(auth.router)
 
-origins = ["http://localhost:5173", "http://127.0.0.1:5173"]
+origins = ["http://localhost:5173",
+           "http://127.0.0.1:5173",
+           "http://localhost:5173/auth/register",
+           "http://localhost:5173/auth/login"]
 
 app.add_middleware(
     CORSMiddleware,
@@ -73,8 +76,8 @@ def delete_item(item_id: int, db: Session = Depends(get_db)):
     return msg
 
 
-@app.get('/auth/me', status_code=status.HTTP_200_OK, tags=[Tags.auth])
-async def user(user: user_dependency, db: Session = Depends(get_db)):
+@app.get('/api/auth/me', status_code=status.HTTP_200_OK, tags=[Tags.auth])
+async def authenticate_token(user: user_dependency, db: Session = Depends(get_db)):
     if user is None:
         raise HTTPException(status_code=401, detail='Authentication Failed')
     return {'user': user}

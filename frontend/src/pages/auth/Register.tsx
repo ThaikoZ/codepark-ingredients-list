@@ -1,7 +1,9 @@
 import { useForm } from "react-hook-form";
+import { useState } from "react";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import UserService, { RegisterForm } from "../../services/users-service";
 import "../../app.css";
 
 const password_msg =
@@ -45,11 +47,26 @@ const schema = z.object({
 type FormData = z.infer<typeof schema>;
 
 const Register = () => {
+  const navigate = useNavigate();
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm<FormData>({ resolver: zodResolver(schema) });
+  const [errorMessage, setErrorMessage] = useState("");
+
+  const createNewAccount = (formData: FormData) => {
+    const body: RegisterForm = {
+      full_name: formData.first_name + " " + formData.last_name,
+      email: formData.email,
+      password: formData.password,
+    };
+
+    const { request, cancel } = UserService.registerUser(body);
+    request.then(() => navigate("../login"));
+    request.catch((err) => setErrorMessage(err.response.data.detail));
+    return () => cancel();
+  };
 
   return (
     <div className="container-fluid d-flex justify-content-center">
@@ -57,7 +74,7 @@ const Register = () => {
         <form
           className="mt-1 mb-5 f-grid"
           // TODO: Register a new account in our database
-          onSubmit={handleSubmit((value) => console.log(value))}
+          onSubmit={handleSubmit((formData) => createNewAccount(formData))}
         >
           <div className="d-flex justify-content-between row g-4">
             <div className="mb-3 col-6">
@@ -151,6 +168,9 @@ const Register = () => {
             Back to login
           </Link>
         </form>
+        {errorMessage && (
+          <p className="form-text text-danger mb-0">{errorMessage + "."}</p>
+        )}
       </div>
     </div>
   );
