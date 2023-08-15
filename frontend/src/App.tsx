@@ -23,13 +23,11 @@ function App() {
     },
   });
   useEffect(() => {
-    // TODO: Session authentication
-
-    authenticateSession();
-
     fetchItems();
   }, []);
-
+  useEffect(() => {
+    authenticateSession();
+  }, [itemList]);
   const visibleItems = selectedCategory
     ? itemList.filter((item) => item.category === selectedCategory)
     : itemList;
@@ -44,7 +42,7 @@ function App() {
 
     const { request, cancel } = UsersService.authenticateUser(token);
     request.then((data) => setUserInfo(data.data));
-    request.catch((err) => navigate("../../auth/login"));
+    request.catch(() => navigate("../../auth/login"));
     return () => cancel();
   };
 
@@ -67,7 +65,7 @@ function App() {
   };
 
   const addItem = (item: Item) => {
-    setItemList([item, ...itemList]);
+    setItemList([...itemList, item]);
 
     const { request, cancel } = ItemsService.addItem(item);
     request.catch((err) => console.log(err));
@@ -84,15 +82,17 @@ function App() {
   return (
     <div className="container-fluid d-flex justify-content-center">
       <div className="submit__form">
+        <h1 className="text-center my-3">{userInfo.User.full_name}'s List</h1>
         <Form
-          onUpdate={(obj) =>
+          onUpdate={(obj) => {
             addItem({
               id: lastId + 1,
               description: obj.description,
               amount: obj.amount,
               category: obj.category,
-            })
-          }
+            });
+            setLastId(lastId + 1);
+          }}
           categories={categories}
         />
         <Tracker
@@ -105,13 +105,7 @@ function App() {
             <div className="spinner-border "></div>
           </div>
         )}
-        <Table
-          itemList={visibleItems}
-          onDelete={(id) => {
-            console.log(id);
-            deleteItem(id);
-          }}
-        />
+        <Table itemList={visibleItems} onDelete={(id) => deleteItem(id)} />
       </div>
     </div>
   );

@@ -1,18 +1,26 @@
-# Project functionalities:
+# Codepark Ingredients List
 
-- Host a local database
-- Connect frontend with backend using generic service and hook.
-- Display interface of ingredients
+Codepark project with frontend in Vite React and backend in FastAPI. I've used OAuth2 to generate session tokens.
 
-TODO:
+## Installation
 
-**FRONTEND**
+Clone repository and write these commands:
 
-- Route: /auth contain a outlet page. Make a redirect
+```bash
+# Configuring the environment for develope
+cd frontend
+npm install
+npm run dev
+cd ../backend
+pip install -r requirements
+cd database
+uvicorn main:app --reload
+```
 
-**BACKEND**:
+## Contributing
 
-- API Authentication
-- Add a table with categories
-- Make a backend autorization and session token.
-- The whole documentation to whole backend
+- Add authentication to API
+
+## License
+
+[MIT](https://choosealicense.com/licenses/mit/)
