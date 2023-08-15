@@ -3,27 +3,50 @@ import Table from "./expense-tracker/components/Table";
 import Tracker from "./expense-tracker/components/Tracker";
 import { useState, useEffect } from "react";
 import ItemsService, { Item } from "./services/items-service";
-import UsersService from "./services/users-service";
+import UsersService, { TokenForm, UserInfo } from "./services/users-service";
 import "./app.css";
+import { useNavigate } from "react-router-dom";
 
 export const categories = ["Groceries", "Utilities", "Entertainment"];
 
 function App() {
+  const navigate = useNavigate();
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [itemList, setItemList] = useState<Item[]>([]);
   const [lastId, setLastId] = useState<number>(0);
   const [isLoading, setLoading] = useState<boolean>(false);
-
+  const [userInfo, setUserInfo] = useState<UserInfo>({
+    User: {
+      email: "",
+      full_name: "",
+      id: 0,
+    },
+  });
   useEffect(() => {
     // TODO: Session authentication
-    // token is in a local storage at key 'session_token'
-    // UsersService.authenticateUser();
+
+    authenticateSession();
+
     fetchItems();
   }, []);
 
   const visibleItems = selectedCategory
     ? itemList.filter((item) => item.category === selectedCategory)
     : itemList;
+
+  const authenticateSession = () => {
+    const item = localStorage.getItem("session_token") || "";
+    const session_token = JSON.parse(item);
+    const token: TokenForm = {
+      token_type: session_token.token_type,
+      access_token: session_token.access_token,
+    };
+
+    const { request, cancel } = UsersService.authenticateUser(token);
+    request.then((data) => setUserInfo(data.data));
+    request.catch((err) => navigate("../../auth/login"));
+    return () => cancel();
+  };
 
   const fetchItems = () => {
     setLoading(true);

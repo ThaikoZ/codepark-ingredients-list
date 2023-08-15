@@ -10,7 +10,6 @@ from passlib.context import CryptContext
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import JWTError, jwt
 from decouple import config
-from fastapi.middleware.cors import CORSMiddleware
 
 router = APIRouter(
     prefix='/api/auth',
@@ -22,7 +21,7 @@ ALGORITHM = config('algorithm')
 EXPIRES_TIME = int(config('expire_time'))
 
 bcrypt_context = CryptContext(schemes=['bcrypt'], deprecated="auto")
-oauth2_bearer = OAuth2PasswordBearer(tokenUrl="auth/token")
+oauth2_bearer = OAuth2PasswordBearer(tokenUrl=router.prefix + "/token")
 
 
 class CreateUserRequest(BaseModel):
@@ -88,6 +87,7 @@ def authenticate_user(email: str, password: str, db):
         return False
     if not bcrypt_context.verify(password, user.hashed_password):
         return False
+
     return user
 
 

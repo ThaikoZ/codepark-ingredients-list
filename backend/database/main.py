@@ -29,7 +29,8 @@ app.include_router(auth.router)
 origins = ["http://localhost:5173",
            "http://127.0.0.1:5173",
            "http://localhost:5173/auth/register",
-           "http://localhost:5173/auth/login"]
+           "http://localhost:5173/auth/login",
+           "http://localhost:5173/app/*"]
 
 app.add_middleware(
     CORSMiddleware,
@@ -49,6 +50,7 @@ def get_db():
 
 
 user_dependency = Annotated[dict, Depends(get_current_user)]
+db_dependency = Annotated[Session, Depends(get_db)]
 
 
 @app.get("/api/items", tags=[Tags.items], summary="Get list of items")
@@ -77,7 +79,7 @@ def delete_item(item_id: int, db: Session = Depends(get_db)):
 
 
 @app.get('/api/auth/me', status_code=status.HTTP_200_OK, tags=[Tags.auth])
-async def authenticate_token(user: user_dependency, db: Session = Depends(get_db)):
+async def authenticate_token(user: user_dependency, db: db_dependency):
     if user is None:
         raise HTTPException(status_code=401, detail='Authentication Failed')
-    return {'user': user}
+    return {'User': user}

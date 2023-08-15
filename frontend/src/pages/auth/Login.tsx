@@ -18,7 +18,7 @@ const Login = () => {
     const { request, cancel } = UserService.loginUser(body);
     request.then((data) => {
       localStorage.setItem("session_token", JSON.stringify(data.data));
-      navigate("../../items");
+      navigate("../../app/items");
     });
     request.catch((err) => setErrorMessage(err.response.data.detail));
     return () => cancel();
@@ -28,7 +28,6 @@ const Login = () => {
       <div className="submit__form">
         <form
           className="mt-1 mb-5 f-grid"
-          // TODO: Check the data is valid
           onSubmit={handleSubmit((data) => logIn(data))}
         >
           <div className="mb-3">

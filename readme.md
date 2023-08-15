@@ -12,6 +12,7 @@ TODO:
 
 **BACKEND**:
 
+- API Authentication
 - Add a table with categories
 - Make a backend autorization and session token.
 - The whole documentation to whole backend

@@ -6,24 +6,10 @@ import "./index.css";
 // Services
 import "./services/api-client.ts";
 // Router DOM and Pages
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import App from "./App.tsx";
-import Register from "./pages/auth/Register.tsx";
-import Login from "./pages/auth/Login.tsx";
-import NotFound from "./pages/NotFound.tsx";
+import MainRouter from "./routes/MainRouter.tsx";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <BrowserRouter>
-      <Routes>
-        <Route index element={<App />} />
-        <Route path="/items" element={<App />} />
-        <Route path="/auth">
-          <Route path="login" element={<Login />} />
-          <Route path="register" element={<Register />} />
-        </Route>
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-    </BrowserRouter>
+    <MainRouter />
   </React.StrictMode>
 );

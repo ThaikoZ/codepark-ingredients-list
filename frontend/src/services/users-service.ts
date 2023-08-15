@@ -11,7 +11,18 @@ export interface LoginForm {
   password: string;
 }
 
-interface SessionForm {}
+export interface TokenForm {
+  access_token: string;
+  token_type: string;
+}
+
+export interface UserInfo {
+  User: {
+    id: number;
+    full_name: string;
+    email: string;
+  };
+}
 
 class UserService {
   registerUser(body: RegisterForm) {
@@ -24,7 +35,6 @@ class UserService {
 
   loginUser(body: LoginForm) {
     const controller = new AbortController();
-    console.log(body);
     const request = apiClient.post<LoginForm[]>("/auth/token", body, {
       signal: controller.signal,
       headers: {
@@ -33,7 +43,17 @@ class UserService {
     });
     return { request, cancel: () => controller.abort() };
   }
-  // TODO: Check current session
+
+  authenticateUser(token: TokenForm) {
+    const controller = new AbortController();
+    const request = apiClient.get<UserInfo>("/auth/me", {
+      signal: controller.signal,
+      headers: {
+        Authorization: `${token.token_type} ${token.access_token}`,
+      },
+    });
+    return { request, cancel: () => controller.abort() };
+  }
 }
 
 export default new UserService();
